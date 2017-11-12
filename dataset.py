@@ -31,7 +31,7 @@ standard_deviation_long = np.std (d_long)
 standard_deviation_lat = np.std (d_lat)
 
 #until there are not 10k records in a list a loop does its job (10k can be changed to any value)
-while len(d_long) <= 10000:
+while len(d_long) < 10000:
 
     if len(d_long) % 200 == 0:
         mean_long = np.mean (d_long[ len(d_long) - 1155: ])
@@ -74,7 +74,33 @@ long_lat = zip(latitude, longitude)
 #convertion from list of tuples to numpy tuples in array
 np_latlon = np.array(long_lat)
 
-print (np_latlon)
+#print (np_latlon)
+#till here everything works good, running script with keras part gives following output:
+#IndexError: index -172 is out of bounds for axis 1 with size 30
+x_train = np_latlon[:9001]
+y_train = keras.utils.to_categorical(np_latlon[9001:], 1000)
+x_test = np_latlon[:9001]
+y_test = keras.utils.to_categorical(np_latlon[9001:], 1000)
+#to fight issue with "ValueError: Error when checking target:
+#expected dense_3 to have shape (None, 10) but got array with shape (18000, 1000)"
+y_train = y_train.reshape((-1, 1))
 
-#x_train = long_lat[:9000]
-#y_train = keras.utils.to_categorical(long_lat, 2)
+#keras blackbox things
+model = Sequential()
+model.add(Dense(64, activation='relu', input_dim=2))
+model.add(Dropout(0.5))
+model.add(Dense(64, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(10, activation='softmax'))
+
+sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+model.compile(loss='sparse_categorical_crossentropy',
+              optimizer=sgd,
+              metrics=['accuracy'])
+
+model.fit(x_train, y_train,
+          epochs=50,
+          batch_size=100)
+score = model.evaluate(x_test, y_test, batch_size=100)
+
+model.summary()

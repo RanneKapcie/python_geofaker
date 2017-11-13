@@ -76,12 +76,12 @@ np_latlon = np.array(long_lat)
 
 #print (np_latlon)
 
+#ISSUE: "ValueError: Input arrays
+#should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
 x_train = np_latlon[:9001]
 y_train = keras.utils.to_categorical(np_latlon[9001:], 1000)
 x_test = np_latlon[:9001]
 y_test = keras.utils.to_categorical(np_latlon[9001:], 1000)
-#to fight issue with "ValueError: Input arrays
-# should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
 y_train = y_train.reshape((-1, 1))
 
 #keras blackbox things

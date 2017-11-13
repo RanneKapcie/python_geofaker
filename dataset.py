@@ -75,14 +75,13 @@ long_lat = zip(latitude, longitude)
 np_latlon = np.array(long_lat)
 
 #print (np_latlon)
-#till here everything works good, running script with keras part gives following output:
-#IndexError: index -172 is out of bounds for axis 1 with size 30
+
 x_train = np_latlon[:9001]
 y_train = keras.utils.to_categorical(np_latlon[9001:], 1000)
 x_test = np_latlon[:9001]
 y_test = keras.utils.to_categorical(np_latlon[9001:], 1000)
-#to fight issue with "ValueError: Error when checking target:
-#expected dense_3 to have shape (None, 10) but got array with shape (18000, 1000)"
+#to fight issue with "ValueError: Input arrays
+# should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
 y_train = y_train.reshape((-1, 1))
 
 #keras blackbox things

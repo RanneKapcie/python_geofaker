@@ -74,19 +74,19 @@ long_lat = zip(latitude, longitude)
 #convertion from list of tuples to numpy tuples in array
 np_latlon = np.array(long_lat)
 
-#print (np_latlon)
+print len(np_latlon)
 
 #ISSUE: "ValueError: Input arrays
 #should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
-x_train = np_latlon[:9001]
-y_train = keras.utils.to_categorical(np_latlon[9001:], 1000)
-x_test = np_latlon[:9001]
-y_test = keras.utils.to_categorical(np_latlon[9001:], 1000)
+x_train = np_latlon[:8000]
+y_train = keras.utils.to_categorical(np_latlon[9996:], 1000)
+x_test = np_latlon[:8000]
+y_test = keras.utils.to_categorical(np_latlon[9996:], 1000)
 y_train = y_train.reshape((-1, 1))
 
-#keras blackbox things
+#keras blackbox thingstop
 model = Sequential()
-model.add(Dense(64, activation='relu', input_dim=2))
+model.add(Dense(64, activation='relu', input_dim=1))
 model.add(Dropout(0.5))
 model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.5))
@@ -103,3 +103,4 @@ model.fit(x_train, y_train,
 score = model.evaluate(x_test, y_test, batch_size=100)
 
 model.summary()
+#ValueError: Error when checking input: expected dense_1_input to have shape (None, 1) but got array with shape (8000, 2)

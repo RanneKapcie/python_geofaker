@@ -2,7 +2,7 @@ from pydataset import data
 import numpy as np
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
+from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.optimizers import SGD
 
 
@@ -78,27 +78,31 @@ print len(np_latlon)
 
 #ISSUE: "ValueError: Input arrays
 #should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
+#X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
+#X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
 x_train = np_latlon[:8000]
-y_train = keras.utils.to_categorical(np_latlon[9996:], 1000)
+y_train = keras.utils.to_categorical(np_latlon[9990:], num_classes=200)
 x_test = np_latlon[:8000]
-y_test = keras.utils.to_categorical(np_latlon[9996:], 1000)
-y_train = y_train.reshape((-1, 1))
-
+y_test = keras.utils.to_categorical(np_latlon[9990:], num_classes=200)
+#y_train = y_train.reshape((-1, 1))
+print len(x_train), len(y_train), len(x_test), len(y_test)
+print (x_train.shape, y_train.shape, x_test.shape, y_test.shape)
 #keras blackbox thingstop
 model = Sequential()
-model.add(Dense(64, activation='relu', input_dim=1))
+model.add(Dense(32, input_shape=(None,10)))
 model.add(Dropout(0.5))
-model.add(Dense(64, activation='relu'))
+model.add(Flatten())
+model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(10, activation='softmax'))
 
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(loss='sparse_categorical_crossentropy',
+model.compile(loss='categorical_crossentropy',
               optimizer=sgd,
               metrics=['accuracy'])
 
 model.fit(x_train, y_train,
-          epochs=50,
+          epochs=25,
           batch_size=100)
 score = model.evaluate(x_test, y_test, batch_size=100)
 

@@ -1,10 +1,10 @@
 from pydataset import data
 import numpy as np
+import csv
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Dense, Dropout, Activation, Flatten, Embedding
 from keras.optimizers import SGD
-
 
 seals = data('seals')
 
@@ -14,7 +14,8 @@ d_long = []
 d_lat = []
 longitude = []
 latitude = []
-
+time = []
+id_l = []
 #iterates through rows of seals dataset an appends deltas values to
 #delta_long and delta_lat lists
 for index, row in seals.iterrows():
@@ -31,7 +32,9 @@ standard_deviation_long = np.std (d_long)
 standard_deviation_lat = np.std (d_lat)
 
 #until there are not 10k records in a list a loop does its job (10k can be changed to any value)
-while len(d_long) < 10000:
+id = 1
+
+while len(d_long) < 19155:
 
     if len(d_long) % 200 == 0:
         mean_long = np.mean (d_long[ len(d_long) - 1155: ])
@@ -67,34 +70,32 @@ while len(d_long) < 10000:
 
     longitude.append(create_long)
     latitude.append(create_lat)
+    time.append(7)
+    id_l.append(id)
+
+    id += 1
 
 #turns 2 lists into 1 list of tuples
-long_lat = zip(latitude, longitude)
+long_lat = map (list, zip(latitude, longitude, time, id_l))
+long_lat = np.array(long_lat)
+long_lat = long_lat [:,np.newaxis]
 
-#convertion from list of tuples to numpy tuples in array
-np_latlon = np.array(long_lat)
-
-print len(np_latlon)
-
-#ISSUE: "ValueError: Input arrays
-#should have the same number of samples as target arrays. Found 9001 input samples and 1998000 target samples."
-#X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
-#X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
-x_train = np_latlon[:8000]
-y_train = keras.utils.to_categorical(np_latlon[9990:], num_classes=200)
-x_test = np_latlon[:8000]
-y_test = keras.utils.to_categorical(np_latlon[9990:], num_classes=200)
+x_train = long_lat[:9000]
+y_train = long_lat[9000:18000]
+x_test = long_lat[:9000]
+y_test = long_lat[9000:18000]
 #y_train = y_train.reshape((-1, 1))
-print len(x_train), len(y_train), len(x_test), len(y_test)
-print (x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-#keras blackbox thingstop
+
+print y_train.shape, y_test.shape, x_train.shape, x_test.shape
+
 model = Sequential()
-model.add(Dense(32, input_shape=(None,10)))
+#model.add(Embedding(9000, 10, input_length = 9000))
+model.add(Dense(units = 64, input_shape = (1, 4)))
 model.add(Dropout(0.5))
-model.add(Flatten())
 model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+#model.add(Flatten())
+model.add(Dense(4, activation='softmax'))
 
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy',
@@ -107,4 +108,11 @@ model.fit(x_train, y_train,
 score = model.evaluate(x_test, y_test, batch_size=100)
 
 model.summary()
-#ValueError: Error when checking input: expected dense_1_input to have shape (None, 1) but got array with shape (8000, 2)
+#np_latlon = np.array(long_lat)
+
+#convertion from list of tuples to numpy tuples in array
+
+#print np_latlon[0]
+#with open('data.csv', 'w') as f:
+#     writer = csv.writer(f, delimiter='\t')
+#     writer.writerows(long_lat)

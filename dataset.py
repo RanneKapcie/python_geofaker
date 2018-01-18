@@ -2,6 +2,7 @@ from pydataset import data
 import numpy as np
 import csv
 import keras
+import math
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten, Embedding
 from keras.optimizers import SGD
@@ -18,6 +19,7 @@ time = []
 id_l = []
 #iterates through rows of seals dataset an appends deltas values to
 #delta_long and delta_lat lists
+
 for index, row in seals.iterrows():
 
     d_long.append(row["delta_long"])
@@ -70,9 +72,35 @@ while len(d_long) < 19155:
 
     longitude.append(create_long)
     latitude.append(create_lat)
-    time.append(7)
     id_l.append(id)
 
+    id += 1
+
+max_delta = 0.7 * (max(d_long) + math.fabs(min(d_long))) + (max(d_lat) + math.fabs(min(d_lat)))
+max_delta_1 = max_delta * 1/7
+max_delta_2 = max_delta * 2/7
+max_delta_3 = max_delta * 3/7
+max_delta_4 = max_delta * 4/7
+max_delta_5 = max_delta * 5/7
+max_delta_6 = max_delta * 6/7
+
+id = 0
+for coords in d_long:
+    current_delta = math.fabs(d_long[id]) + math.fabs(d_lat[id])
+    if current_delta < max_delta_1:
+        time.append(1)
+    elif (current_delta < max_delta_2) & (current_delta > max_delta_1):
+        time.append(2)
+    elif (current_delta < max_delta_3) & (current_delta > max_delta_2):
+        time.append(3)
+    elif (current_delta < max_delta_4) & (current_delta > max_delta_3):
+        time.append(4)
+    elif (current_delta < max_delta_5) & (current_delta > max_delta_4):
+        time.append(5)
+    elif (current_delta < max_delta_6) & (current_delta > max_delta_5):
+        time.append(6)
+    elif current_delta > max_delta_6:
+        time.append(7)
     id += 1
 
 #turns 2 lists into 1 list of tuples
@@ -80,21 +108,19 @@ long_lat = map (list, zip(latitude, longitude, time, id_l))
 long_lat = np.array(long_lat)
 long_lat = long_lat [:,np.newaxis]
 
+
 x_train = long_lat[:9000]
 y_train = long_lat[9000:18000]
 x_test = long_lat[:9000]
 y_test = long_lat[9000:18000]
-#y_train = y_train.reshape((-1, 1))
 
 print y_train.shape, y_test.shape, x_train.shape, x_test.shape
 
 model = Sequential()
-#model.add(Embedding(9000, 10, input_length = 9000))
 model.add(Dense(units = 64, input_shape = (1, 4)))
 model.add(Dropout(0.5))
 model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.5))
-#model.add(Flatten())
 model.add(Dense(4, activation='softmax'))
 
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -108,11 +134,3 @@ model.fit(x_train, y_train,
 score = model.evaluate(x_test, y_test, batch_size=100)
 
 model.summary()
-#np_latlon = np.array(long_lat)
-
-#convertion from list of tuples to numpy tuples in array
-
-#print np_latlon[0]
-#with open('data.csv', 'w') as f:
-#     writer = csv.writer(f, delimiter='\t')
-#     writer.writerows(long_lat)

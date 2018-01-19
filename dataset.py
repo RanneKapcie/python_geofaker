@@ -16,7 +16,6 @@ d_lat = []
 longitude = []
 latitude = []
 time = []
-id_l = []
 group_l = []
 #iterates through rows of seals dataset an appends deltas values to
 #delta_long and delta_lat lists
@@ -97,7 +96,6 @@ while len(d_long) < 19155:
 #adds id, longitude and latitude to lists
     longitude.append(create_long)
     latitude.append(create_lat)
-    id_l.append(id)
     group_l.append(group)
 
     id += 1 #increment id by 1
@@ -133,8 +131,7 @@ for coords in d_long:
     id += 1
 
 #turns 2 lists into 1 list of tuples
-long_lat = map (list, zip(latitude, longitude, time, id_l, group_l))
-print long_lat
+long_lat = map (list, zip(latitude, longitude, time, group_l))
 long_lat = np.array(long_lat)
 long_lat = long_lat [:,np.newaxis]
 
@@ -162,7 +159,7 @@ model.compile(loss='categorical_crossentropy',
 
 model.fit(x_train, y_train,
           epochs=25,
-          batch_size=100)
+          batch_size=50)
 score = model.evaluate(x_test, y_test, batch_size=100)
 
 model.summary()

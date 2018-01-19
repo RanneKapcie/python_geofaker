@@ -17,6 +17,7 @@ longitude = []
 latitude = []
 time = []
 id_l = []
+group_l = []
 #iterates through rows of seals dataset an appends deltas values to
 #delta_long and delta_lat lists
 
@@ -50,10 +51,20 @@ while len(d_long) < 19155:
     zero_one_lat = np.random.randint(low = 0, high = 2)
 
 #creates random values from range of mean-sd*1.75 to mean+sd*1.75
-    create_dlong = np.random.uniform (low = (mean_long - 1.75*standard_deviation_long),
-    high = (mean_long + 1.75*standard_deviation_long))
-    create_dlat = np.random.uniform (low = (mean_lat - 1.75*standard_deviation_lat),
-    high = (mean_lat + 1.75*standard_deviation_lat))
+    if (id <= 3000) or ((id > 9000) and (id <= 12000)):
+        multiplier = 1
+        group = 1
+    elif (id <= 6000 and id > 3000) or (id > 12000 and id <= 15000):
+        multiplier = 1.5
+        group = 2
+    elif (id <= 9000 and id > 6000) or (id > 15000):
+        multiplier = 1.75
+        group = 3
+
+    create_dlong = np.random.uniform (low = (mean_long - multiplier*standard_deviation_long),
+    high = (mean_long + multiplier*standard_deviation_long))
+    create_dlat = np.random.uniform (low = (mean_lat - multiplier*standard_deviation_lat),
+    high = (mean_lat + multiplier*standard_deviation_lat))
 
 #now if zero_one_lat which was defined earlier is 0, than the delta is multiplied by -1
 #if equals 1, than it stays as before
@@ -87,6 +98,7 @@ while len(d_long) < 19155:
     longitude.append(create_long)
     latitude.append(create_lat)
     id_l.append(id)
+    group_l.append(group)
 
     id += 1 #increment id by 1
 
@@ -121,7 +133,8 @@ for coords in d_long:
     id += 1
 
 #turns 2 lists into 1 list of tuples
-long_lat = map (list, zip(latitude, longitude, time, id_l))
+long_lat = map (list, zip(latitude, longitude, time, id_l, group_l))
+print long_lat
 long_lat = np.array(long_lat)
 long_lat = long_lat [:,np.newaxis]
 
